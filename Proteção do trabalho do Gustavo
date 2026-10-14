@@ -1,0 +1,63 @@
+### 4.3 Armazenamento (por usuário)
+
+A preferência é **salva no cadastro de cada usuário**, não é global:
+
+| Campo | Conteúdo |
+| --- | --- |
+| `editAccent` | Hex da cor escolhida (ex.: `#03A057`) **ou** a palavra `"mono"` (preto e branco). Padrão: `#03A057`. |
+| `editAccentHex` | Última cor personalizada em hex. Serve para o seletor lembrar a cor quando o usuário alterna para "mono". |
+
+Qualquer valor inválido (que não seja `mono` nem um hex de 6 dígitos) volta para `#03A057`.
+
+### 4.4 Variáveis CSS aplicadas
+
+Ao carregar o editor, ao trocar de tema e ao escolher uma cor, o sistema grava estas variáveis na raiz do documento:
+
+| Variável | Valor | Como é obtida |
+| --- | --- | --- |
+| `--color-accent` | Cor escolhida (padrão `#03A057`) | Direto do valor salvo. |
+| `--color-accent-dark` | Tom secundário (hover e estado pressionado) | Mapa `EDIT_ACCENT_DARK_BY_BASE` para as cinco cores do produto; **qualquer outra cor usa o fallback: escurecer 22%** (cada canal RGB × 0,78). |
+| `--color-accent-ink` | `#FFFFFF` ou `#16181C` | Texto sobre a cor, conforme o contraste (seção 4.5). |
+| `--color-accent-rgb` | Ex.: `3, 160, 87` | Canais RGB da cor, para sombras e transparências. |
+| `--color-accent-dark-rgb` | Ex.: `2, 128, 70` | Canais RGB do tom secundário. |
+
+**Mapa de tons secundários** (`EDIT_ACCENT_DARK_BY_BASE`): contém só as cinco cores do produto, com tons escolhidos à mão (igual à tabela da [seção 2](#2-paleta-de-cores)).
+
+| Cor | Padrão | Secundário |
+| --- | --- | --- |
+| Verde Pague Zero (padrão do editor) | ![#03A057](https://img.shields.io/badge/%2303A057-03A057?style=flat-square) `#03A057` | ![#028046](https://img.shields.io/badge/%23028046-028046?style=flat-square) `#028046` |
+| Azul | ![#2F5DFF](https://img.shields.io/badge/%232F5DFF-2F5DFF?style=flat-square) `#2F5DFF` | ![#1E3FB0](https://img.shields.io/badge/%231E3FB0-1E3FB0?style=flat-square) `#1E3FB0` |
+| Vermelho | ![#E5383B](https://img.shields.io/badge/%23E5383B-E5383B?style=flat-square) `#E5383B` | ![#A6281D](https://img.shields.io/badge/%23A6281D-A6281D?style=flat-square) `#A6281D` |
+| Amarelo | ![#F5B700](https://img.shields.io/badge/%23F5B700-F5B700?style=flat-square) `#F5B700` | ![#D9A404](https://img.shields.io/badge/%23D9A404-D9A404?style=flat-square) `#D9A404` |
+| Laranja | ![#FF7A00](https://img.shields.io/badge/%23FF7A00-FF7A00?style=flat-square) `#FF7A00` | ![#B85809](https://img.shields.io/badge/%23B85809-B85809?style=flat-square) `#B85809` |
+
+Qualquer cor que não esteja no mapa usa o fallback (cada canal × 0,78).
+
+### 4.5 Regras de contraste do texto
+
+O sistema calcula a **luminância relativa** da cor escolhida. Se ela for **maior que 0,5**, o texto sobre a cor é escuro (`#16181C`); caso contrário, é branco (`#FFFFFF`). Na prática, só cores muito claras recebem texto escuro. A regra vale para qualquer cor do seletor livre; os exemplos abaixo mostram um caso claro, um médio e um escuro.
+
+| Exemplo | Luminância | Texto automático | Contraste do texto |
+| --- | --- | --- | --- |
+| Cor clara: Amarelo `#F5B700` | 0,533 | `#16181C` | 9,87:1 |
+| Cor média: Verde Pague Zero (padrão) `#03A057` | 0,258 | `#FFFFFF` | 3,40:1 |
+| Cor escura: Azul `#2F5DFF` | 0,157 | `#FFFFFF` | 5,08:1 |
+
+> O limiar fixo de 0,5 deixa texto branco com contraste abaixo de 4,5:1 sobre cores de luminância média (como o verde padrão e tons de laranja ou vermelho; ver [seção 8](#8-acessibilidade-e-contraste), pontos de atenção). Como a cor é livre, o contraste final depende da escolha de cada usuário.
+
+### 4.6 Migração de valores antigos
+
+Ao carregar os usuários salvos, valores de versões anteriores são convertidos automaticamente (`EDIT_ACCENT_MIGRA`), tanto em `editAccent` quanto em `editAccentHex`:
+
+| Valor antigo | Vira |
+| --- | --- |
+| `#1C9346`, `#1E9E4B`, `#14653F`, `#4CB784` (verdes antigos) | ![#03A057](https://img.shields.io/badge/%2303A057-03A057?style=flat-square) `#03A057` |
+| `#1266E0` (azul antigo) | ![#2F5DFF](https://img.shields.io/badge/%232F5DFF-2F5DFF?style=flat-square) `#2F5DFF` |
+| `#D9A404` (amarelo escuro, usado como padrão) | ![#F5B700](https://img.shields.io/badge/%23F5B700-F5B700?style=flat-square) `#F5B700` |
+| `#E8710A` (laranja antigo) | ![#FF7A00](https://img.shields.io/badge/%23FF7A00-FF7A00?style=flat-square) `#FF7A00` |
+| `#D93025` (vermelho antigo) | ![#E5383B](https://img.shields.io/badge/%23E5383B-E5383B?style=flat-square) `#E5383B` |
+| Nomes antigos de cor salvos (`verde`, `azul`, `amarelo` etc.) | O hex da cor correspondente |
+
+Qualquer verde antigo que ainda chegue à aplicação é tratado como o Verde Pague Zero. Esses valores existem **apenas na tabela de migração**; não devem aparecer em nenhuma outra parte do template ou da interface.
+
+**Menu do Dashboard.** A ordem das abas é: **Ajustes, Relatórios, Insights, Cadastro, Doação, Meus anúncios, Home e Notas**, com o botão **Sair** na barra superior. O menu pode ficar na **esquerda, direita, topo ou rodapé** e pode ser **expandido** (ícone e nome) ou **compacto** ("rail", só ícones). O item ativo usa a cor escolhida com o texto automático.
